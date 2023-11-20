@@ -2,8 +2,10 @@ import numpy as np
 import pickle as pkl
 import networkx as nx
 import scipy.sparse as sp
-from scipy.sparse.linalg.eigen.arpack import eigsh
+#from scipy.sparse.linalg.eigen.arpack import eigsh
+from scipy.sparse.linalg import eigs, eigsh
 import sys
+import os
 
 
 def parse_index_file(filename):
@@ -18,7 +20,7 @@ def sample_mask(idx, l):
     """Create mask."""
     mask = np.zeros(l)
     mask[idx] = 1
-    return np.array(mask, dtype=np.bool)
+    return np.array(mask, dtype=bool)
 
 
 def load_data(dataset_str):
@@ -44,14 +46,19 @@ def load_data(dataset_str):
     names = ['x', 'y', 'tx', 'ty', 'allx', 'ally', 'graph']
     objects = []
     for i in range(len(names)):
-        with open("data/ind.{}.{}".format(dataset_str, names[i]), 'rb') as f:
+        dirname = os.path.dirname(__file__)
+        pth = "data/ind.{}.{}".format(dataset_str, names[i])
+        with open(os.path.join(dirname, pth), 'rb') as f:
             if sys.version_info > (3, 0):
                 objects.append(pkl.load(f, encoding='latin1'))
             else:
                 objects.append(pkl.load(f))
 
     x, y, tx, ty, allx, ally, graph = tuple(objects)
-    test_idx_reorder = parse_index_file("data/ind.{}.test.index".format(dataset_str))
+    path2 = "data/ind.{}.test.index".format(dataset_str)
+    dirname2 = os.path.dirname(__file__)
+
+    test_idx_reorder = parse_index_file(os.path.join(dirname2, path2))
     test_idx_range = np.sort(test_idx_reorder)
 
     if dataset_str == 'citeseer':
