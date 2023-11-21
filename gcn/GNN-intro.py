@@ -69,6 +69,7 @@ class GCN(torch.nn.Module):
         self.classifier = Linear(2, dataset.num_classes)
 
     def forward(self, x, edge_index):
+        #plt.hist(x.detach().numpy(), bins=10)
         h = self.conv1(x, edge_index)
         h = h.tanh()
         h = self.conv2(h, edge_index)
@@ -96,7 +97,7 @@ def train(data):
     optimizer.step()  # Update parameters based on gradients.
     return loss, h
 
-for epoch in range(401):
+for epoch in range(3):
     loss, h = train(data)
     print(f'Epoch: {epoch}, Loss: {loss}')
 
