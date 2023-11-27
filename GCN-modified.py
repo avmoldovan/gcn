@@ -85,6 +85,7 @@ noisy_data.edge_index = perturb_edges(noisy_data.edge_index)
 
 # Train a model
 def train_model(data, model, epochs = 200):
+    best_loss = 0.
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     model.train()
     for epoch in range(epochs):
@@ -93,32 +94,58 @@ def train_model(data, model, epochs = 200):
         loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
         loss.backward()
         optimizer.step()
-        if epoch % 10 == 0:
-            print(f'Epoch: {epoch}, Loss: {loss}')
-    return model
+        #if epoch % 10 == 0:
+        #    print(f'Epoch: {epoch}, Loss: {loss}')
+
+        if best_loss > loss:
+            best_loss = loss
+        elif best_loss == 0.:
+            best_loss = loss
+
+    print(f'Epoch: {epoch}, Loss: {best_loss}')
+    return model, best_loss
 
 # Train models on original and noisy data
 original_model = GCN().to(device)
 noisy_model = GCN().to(device)
 noisy_data = noisy_data.to(device)
 
+runs = 30
 epcount = 200
-print("Training unmodified model")
-train_model(data, original_model, epcount)
-print("Training MODIFIED model")
-train_model(noisy_data, noisy_model, epcount)
+unmodified_wins = 0
 
+for j in range(runs):
+    print("Training unmodified model")
+    _, modelloss1 = train_model(data, original_model, epcount)
+    print("Training MODIFIED model")
+    _, modelloss2 = train_model(noisy_data, noisy_model, epcount)
 
-def visualize_graph(G, model, data, title):
-    model.eval()
-    _, pred = model(data).max(dim=1)
+    if (modelloss1 < modelloss2):
+        print(f'UNMODIFIED model is better')
+        unmodified_wins+=1
+    else:
+        print(f'ALTERED model is better')
+
+print(f'ALTERED model won {int(runs - unmodified_wins)} times out of {runs}')
+
+def visualize_graph(G, model1, model2, data1, data2, title1, title2):
+    fig, ax = plt.subplots(2, figsize=(12, 12))
+
+    model1.eval()
+    _, pred = model1(data1).max(dim=1)
     color = pred.cpu().numpy()
 
-    plt.figure(figsize=(8, 8))
-    nx.draw_networkx(G, node_color=color, with_labels=True, node_size=70, font_size=10)
-    plt.title(title)
+    ax[0].set_title(title1)
+    nx.draw_networkx(G, node_color=color, with_labels=True, node_size=70, font_size=10, ax=ax[0])
+
+    model2.eval()
+    _, pred = model2(data2).max(dim=1)
+    color = pred.cpu().numpy()
+
+    ax[1].set_title(title2)
+    nx.draw_networkx(G, node_color=color, with_labels=True, node_size=70, font_size=10, ax=ax[1])
+
+    plt.show()
 
 # Visualize original and noisy graphs
-visualize_graph(G, original_model, data, "Original Network")
-visualize_graph(G, noisy_model, noisy_data, "Noisy Network")
-plt.show()
+#visualize_graph(G, original_model, noisy_model, data, noisy_data, "Original Network", "Noisy Network")
