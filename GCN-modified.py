@@ -38,6 +38,27 @@ model = GCN().to(device)
 data = data.to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 
+print('Dataset properties')
+print('==============================================================')
+print(f'Dataset: {dataset}') #This prints the name of the dataset
+print(f'Number of graphs in the dataset: {len(dataset)}')
+print(f'Number of features: {dataset.num_features}') #Number of features each node in the dataset has
+print(f'Number of classes: {dataset.num_classes}') #Number of classes that a node can be classified into
+
+
+#Since we have one graph in the dataset, we will select the graph and explore it's properties
+
+dsmeta = dataset[0]
+print('Graph properties')
+print('==============================================================')
+
+# Gather some statistics about the graph.
+print(f'Number of nodes: {dsmeta.num_nodes}') #Number of nodes in the graph
+print(f'Number of edges: {dsmeta.num_edges}') #Number of edges in the graph
+print(f'Average node degree: {dsmeta.num_edges / dsmeta.num_nodes:.2f}') # Average number of nodes in the graph
+print(f'Contains isolated nodes: {dsmeta.has_isolated_nodes()}') #Does the graph contains nodes that are not connected
+print(f'Contains self-loops: {dsmeta.has_self_loops()}') #Does the graph contains nodes that are linked to themselves
+print(f'Is undirected: {dsmeta.is_undirected()}') #Is the graph an undirected graph
 
 # Function to add Gaussian noise to node features
 def add_noise_to_features(features, noise_level=0.1):
@@ -63,15 +84,17 @@ noisy_data.edge_index = perturb_edges(noisy_data.edge_index)
 
 
 # Train a model
-def train_model(data, model):
+def train_model(data, model, epochs = 200):
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     model.train()
-    for epoch in range(200):
+    for epoch in range(epochs):
         optimizer.zero_grad()
         out = model(data)
         loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
         loss.backward()
         optimizer.step()
+        if epoch % 10 == 0:
+            print(f'Epoch: {epoch}, Loss: {loss}')
     return model
 
 # Train models on original and noisy data
@@ -79,8 +102,11 @@ original_model = GCN().to(device)
 noisy_model = GCN().to(device)
 noisy_data = noisy_data.to(device)
 
-train_model(data, original_model)
-train_model(noisy_data, noisy_model)
+epcount = 200
+print("Training unmodified model")
+train_model(data, original_model, epcount)
+print("Training MODIFIED model")
+train_model(noisy_data, noisy_model, epcount)
 
 
 def visualize_graph(G, model, data, title):
