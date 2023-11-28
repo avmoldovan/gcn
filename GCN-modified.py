@@ -62,6 +62,7 @@ print(f'Is undirected: {dsmeta.is_undirected()}') #Is the graph an undirected gr
 
 # Function to add Gaussian noise to node features
 def add_noise_to_features(features, noise_level=0.1):
+    #torch.special.entr(features)
     noise = torch.randn(features.size()) * noise_level
     return features + noise.to(device)
 
@@ -73,6 +74,8 @@ def perturb_edges(edge_index, perturb_rate=0.1):
 
     for _ in range(num_perturb):
         idx = np.random.randint(edges.shape[0])
+        #entr = torch.special.entr(edges).to(device)
+        #torch.special.entr(edges).to(device)  #
         perturbed_edges[idx] = torch.tensor(np.random.choice(edges.shape[1], 2), dtype=torch.long).to(device)
 
     return torch.tensor(perturbed_edges, dtype=torch.long).t()
@@ -97,7 +100,7 @@ def train_model(data, model, epochs = 200):
         #if epoch % 10 == 0:
         #    print(f'Epoch: {epoch}, Loss: {loss}')
 
-        if best_loss > loss:
+        if best_loss < loss:
             best_loss = loss
         elif best_loss == 0.:
             best_loss = loss
