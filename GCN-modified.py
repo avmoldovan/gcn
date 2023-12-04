@@ -37,7 +37,7 @@ class GCN(torch.nn.Module):
         return F.log_softmax(x, dim=1)
 
 # Prepare for training
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 model = GCN().to(device)
 data = data.to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
@@ -101,9 +101,9 @@ def update_features_with_edge_values(data, G):
 
         # Sum the features of the two nodes
         feature_sum = features[node1] + features[node2]
-        entr = torch.special.entr(features[node1] + features[node2])
+        entr = torch.special.entr(features[node1]) + torch.special.entr(features[node2])
 
-        G[node1][node2]['weight'] = entr
+        G[node1][node2]['weight'] = torch.randn((34))+200.
         # Update the features of both nodes
         # features[node1] = feature_sum
         # features[node2] = feature_sum

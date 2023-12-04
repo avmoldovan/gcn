@@ -26,7 +26,7 @@ from torch import Tensor
 AVAIL_GPUS = min(1, torch.cuda.device_count())
 BATCH_SIZE = 256 if AVAIL_GPUS else 64
 # Path to the folder where the datasets are/should be downloaded
-DATASET_PATH = os.environ.get("PATH_DATASETS", "data/")
+DATASET_PATH = os.environ.get("PATH_DATASETS", "gcn/data/")
 # Path to the folder where the pretrained models are saved
 CHECKPOINT_PATH = os.environ.get("PATH_CHECKPOINT", "saved_models/GNNs/")
 

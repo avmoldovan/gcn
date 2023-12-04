@@ -3,20 +3,26 @@ from __future__ import print_function
 
 import time
 import tensorflow as tf
+import os
 
 from gcn.utils import *
 from gcn.models import GCN, MLP
 
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 # Set random seed
 seed = 123
 np.random.seed(seed)
-tf.compat.v1.set_random_seed(seed)
+tf.random.set_seed(seed)
+
+tf.compat.v1.disable_eager_execution()
+
 
 # Settings
 flags = tf.compat.v1.flags
 FLAGS = flags.FLAGS
 flags.DEFINE_string('dataset', 'cora', 'Dataset string.')  # 'cora', 'citeseer', 'pubmed'
-flags.DEFINE_string('model', 'gcn', 'Model string.')  # 'gcn', 'gcn_cheby', 'dense'
+flags.DEFINE_string('model', 'gcn_cheby', 'Model string.')  # 'gcn', 'gcn_cheby', 'dense'
 flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
 flags.DEFINE_integer('epochs', 200, 'Number of epochs to train.')
 flags.DEFINE_integer('hidden1', 16, 'Number of units in hidden layer 1.')
