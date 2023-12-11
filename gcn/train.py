@@ -8,6 +8,8 @@ import os
 from gcn.utils import *
 from gcn.models import GCN, MLP
 
+from PyIF import te_compute as te
+
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 # Set random seed

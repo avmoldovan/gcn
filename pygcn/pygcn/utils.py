@@ -12,7 +12,7 @@ def encode_onehot(labels):
     return labels_onehot
 
 
-def load_data(path="../data/cora/", dataset="cora"):
+def load_data(path="./pygcn/data/cora/", dataset="cora", device=None):
     """Load citation network dataset (cora only for now)"""
     print('Loading {} dataset...'.format(dataset))
 
@@ -44,7 +44,7 @@ def load_data(path="../data/cora/", dataset="cora"):
 
     features = torch.FloatTensor(np.array(features.todense()))
     labels = torch.LongTensor(np.where(labels)[1])
-    adj = sparse_mx_to_torch_sparse_tensor(adj)
+    adj = sparse_mx_to_torch_sparse_tensor(adj, device=device)
 
     idx_train = torch.LongTensor(idx_train)
     idx_val = torch.LongTensor(idx_val)
@@ -70,11 +70,11 @@ def accuracy(output, labels):
     return correct / len(labels)
 
 
-def sparse_mx_to_torch_sparse_tensor(sparse_mx):
+def sparse_mx_to_torch_sparse_tensor(sparse_mx, device):
     """Convert a scipy sparse matrix to a torch sparse tensor."""
     sparse_mx = sparse_mx.tocoo().astype(np.float32)
     indices = torch.from_numpy(
         np.vstack((sparse_mx.row, sparse_mx.col)).astype(np.int64))
     values = torch.from_numpy(sparse_mx.data)
     shape = torch.Size(sparse_mx.shape)
-    return torch.sparse.FloatTensor(indices, values, shape)
+    return torch.sparse_coo_tensor(indices, values, shape, device=device)

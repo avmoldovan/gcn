@@ -5,6 +5,9 @@ flags = tf.compat.v1.flags
 FLAGS = flags.FLAGS
 
 
+from PyIF import te_compute as te
+
+
 class Model(object):
     def __init__(self, **kwargs):
         allowed_kwargs = {'name', 'logging'}

@@ -1,6 +1,8 @@
 from gcn.inits import *
 import tensorflow as tf
 
+from PyIF import te_compute as te
+
 flags = tf.compat.v1.flags
 FLAGS = flags.FLAGS
 
